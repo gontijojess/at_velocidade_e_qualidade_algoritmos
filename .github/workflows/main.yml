@@ -1,0 +1,29 @@
+name: Report Critical Incident to LinearB
+
+on:
+  issues:
+    types: [labeled]
+
+jobs:
+  report-incident:
+    runs-on: ubuntu-latest
+    if: github.event.label.name == 'failure'
+    steps:
+      - name: Get Current Time
+        id: time
+        run: echo "time=$(date -u +"%Y-%m-%dT%H:%M:%SZ")" >> $GITHUB_ENV
+
+      - name: Send Incident to LinearB
+        run: |
+          curl -X 'POST' \
+            'https://public-api.linearb.io/api/v1/incidents' \
+            -H 'accept: application/json' \
+            -H 'x-api-key: ${{ secrets.LINEARB_SECRET }}' \
+            -H 'Content-Type: application/json' \
+            -d '{
+            "provider_id": "${{ github.event.issue.id }}",
+            "http_url": "${{ github.event.issue.html_url }}",
+            "title": "Failure in ${{ github.event.repository.name }}",
+            "issued_at": "${{ github.event.issue.created_at }}",
+            "started_at": "${{ env.time }}"
+          }'
