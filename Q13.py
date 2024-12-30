@@ -1,5 +1,6 @@
 import sys
 sys.stdout.reconfigure(encoding='utf-8')
+
 def knapsack_dinamic(values, weight, capacity):
     n = len(values)
     dp = [[0 for _ in range(capacity + 1)] for _ in range(n + 1)]
