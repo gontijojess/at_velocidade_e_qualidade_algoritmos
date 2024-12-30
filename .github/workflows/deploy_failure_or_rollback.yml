@@ -1,0 +1,29 @@
+name: Report Deploy Failure or Rollback to LinearB
+
+on:
+  deployment_status:
+    types: [failure, rollback]
+
+jobs:
+  report-incident:
+    runs-on: ubuntu-latest
+    if: github.event.deployment_status.state == 'failure' || github.event.deployment_status.state == 'rollback'
+    steps:
+      - name: Get Current Time
+        id: time
+        run: echo "time=$(date -u +"%Y-%m-%dT%H:%M:%SZ")" >> $GITHUB_ENV
+
+      - name: Send Incident to LinearB
+        run: |
+          curl -X POST https://api.linearb.io/incidents \
+          -H "Authorization: ${{ secrets.LINEARB_SECRET }}" \
+          -H "Content-Type: application/json" \
+          -d '{
+            "provider_id": "deployment-id-${{ github.event.deployment.id }}",
+            "http_url": "https://github.com/${{ github.repository }}/deployments/${{ github.event.deployment.id }}",
+            "title": "Deployment Failure or Rollback in ${{ github.repository }}: ${{ github.event.deployment_status.environment }}",
+            "issued_at": "${{ github.event.deployment_status.created_at }}",
+            "started_at": "${{ env.time }}",  # Hora de quando o workflow foi acionado
+            "teams": ["Team A", "Team B"],
+            "repository_urls": ["https://github.com/${{ github.repository }}"]
+          }'
