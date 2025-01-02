@@ -23,7 +23,7 @@ jobs:
             -d '{
             "provider_id": "${{ github.event.issue.id }}",
             "http_url": "${{ github.event.issue.html_url }}",
-            "title": "Failure in ${{ github.event.repository.name }}",
+            "title": "${{ github.event.issue.title }}",
             "issued_at": "${{ github.event.issue.created_at }}",
             "started_at": "${{ env.time }}"
           }'
