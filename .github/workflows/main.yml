@@ -2,7 +2,7 @@ name: Report Critical Incident to LinearB
 
 on:
   issues:
-    types: [labeled]
+    types: [labeled, unlabeled, edited, closed]
 
 jobs:
   report-incident:
