@@ -18,7 +18,7 @@ jobs:
           curl -X 'POST' \
             'https://public-api.linearb.io/api/v1/incidents' \
             -H 'accept: application/json' \
-            -H 'x-api-key: ${{ secrets.LINEARB_KEY }}' \
+            -H 'x-api-key: ${{ secrets.LINEARB_SECRET }}' \
             -H 'Content-Type: application/json' \
             -d '{
             "provider_id": "${{ github.event.issue.id }}",
