@@ -2,15 +2,13 @@ name: Report Critical Incident to LinearB
 
 on:
   issues:
-    types: [labeled, unlabeled, edited, closed]
+    types: [labeled, unlabeled, reopened, closed]
 
 jobs:
   report-incident:
     runs-on: ubuntu-latest
-    if: github.event.label.name == 'failure'
+    if: contains(github.event.issue.labels.*.name, 'critical-failure')
     steps:
-      - name: Debug GitHub Event Payload
-        run: echo "${{ toJson(github.event) }}"
       - name: Send Incident to LinearB
         run: |
           curl -X 'POST' \
