@@ -1,0 +1,40 @@
+name: Update LinearB on Issue Closed
+
+on:
+  issues:
+    types: [closed]
+
+jobs:
+  update-linearb:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Fetch Issue Details
+        id: fetch-issue
+        run: |
+          curl -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+               -H "Accept: application/vnd.github.v3+json" \
+               https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.issue.number }} > issue.json
+          echo "Issue details fetched."
+
+      - name: Check for Critical Failure Label
+        id: check-label
+        run: |
+          if jq -e '.labels[] | select(.name=="failure")' issue.json > /dev/null; then
+            echo "label_check=true" >> $GITHUB_ENV
+          else
+            echo "label_check=false" >> $GITHUB_ENV
+          fi
+        shell: bash
+
+      - name: Update LinearB
+        if: env.label_check == 'true'
+        run: |
+          curl -X 'PATCH' \
+            'https://public-api.linearb.io/api/v1/incidents/${{ github.event.issue.id }}' \
+            -H 'accept: application/json' \
+            -H 'x-api-key: ${{ secrets.LINEARB_SECRET }}' \
+            -H 'Content-Type: application/json' \
+            -d '{
+              "ended_at": "${{ github.event.issue.closed_at }}"
+            }'
