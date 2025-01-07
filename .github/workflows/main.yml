@@ -2,12 +2,12 @@ name: Report Critical Incident to LinearB
 
 on:
   issues:
-    types: [labeled, unlabeled, reopened, closed]
+    types: [labeled]
 
 jobs:
   report-incident:
     runs-on: ubuntu-latest
-    if: contains(github.event.issue.labels.*.name, 'critical-failure')
+    if: github.event.label.name == 'failure'
     steps:
       - name: Send Incident to LinearB
         run: |
@@ -22,5 +22,4 @@ jobs:
             "title": "${{ github.event.issue.title }}",
             "issued_at": "${{ github.event.issue.created_at }}",
             "started_at": "${{ github.event.issue.created_at }}",
-            "ended_at": "${{ github.event.issue.closed_at }}"
           }'
